@@ -15,7 +15,7 @@ void delay(unsigned long ms)
     while((hundredSeconds-lastTime) < ms*10);
 }
 
-int main()
+void initDelay()
 {
     TMOD |= 0x02;  // Time0 is running at mod 3
     TH0 = 256-FREQ/120;
@@ -23,6 +23,11 @@ int main()
     TR0 = 1;
     ET0 = 1;
     EA = 1;
+}
+
+int main()
+{
+    initDelay();
 
     P1_0 = 0;
     while(1)
