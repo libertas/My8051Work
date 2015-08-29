@@ -1,4 +1,4 @@
-#include <at89x52.h>
+#include <8051.h>
 #define FREQ 11529  // kHz
 
 unsigned long hundredSeconds = 0;
