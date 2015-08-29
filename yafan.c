@@ -3,7 +3,7 @@
 
 unsigned long hundredSeconds = 0;
 
-void int0() __interrupt(1)
+void timer0() __interrupt(1)
 {
     hundredSeconds++;
 }
@@ -66,13 +66,64 @@ unsigned int keyScan()
     return result;
 }
 
+unsigned char minutes = 0, seconds = 60;
+
+void timer1() __interrupt(3)
+{
+    static unsigned int t;
+    t++;
+    if(t == (unsigned int)(FREQ/3.072))  // 1 second
+    {
+        t = 0;
+        if(seconds)
+            seconds--;
+        else if(minutes)
+        {
+            minutes--;
+            seconds=59;
+        }
+    }
+}
+
+// Get the lowest number from the keys pressed
+unsigned char fromKey2Int(unsigned int key)
+{
+    unsigned char i;
+    for(i=0; i<16; i++)
+    {
+        if(key&1<<i)
+            return i;
+    }
+    return 0;
+}
+
+void initTimer1()
+{
+    TMOD |= 0x20;  // Time1 is running at mod 3
+    TH1 = 0;
+    TL1 = 0;
+    TR1 = 1;
+    ET1 = 1;
+    EA = 1;
+}
+
 int main()
 {
+    unsigned int key;
     initDelay();
-
+    initTimer1();
     while(1)
     {
-        P2 = keyScan()>>8;
+        key = keyScan();
+        if(key)
+        {
+            minutes = fromKey2Int(key) * 10;
+        }
+        P2 = ~minutes;  // Show the minutes left on P2
+        if(minutes)
+            P1_0 = 0;  // Power on
+        else
+            P1_0 = 1;  // Power off
     }
     return 0;
 }
