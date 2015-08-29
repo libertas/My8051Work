@@ -150,7 +150,11 @@ int main()
         if(minutes)
             P1_0 = 0;  // Power on
         else
+        {
             P1_0 = 1;  // Power off
+            P2 = 0xff;  // Turn off the leds
+            statusP2 = 1;  // Default value
+        }
     }
     return 0;
 }
