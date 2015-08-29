@@ -42,7 +42,7 @@ unsigned int keyScan()
     delay(1);
     tmp1 |= P3 & 0xf0;
 
-    delay(8);  // Avoid the shaking
+    delay(8);  // In case of shaking
 
     P3 = 0x0f;
     delay(1);
@@ -63,10 +63,13 @@ unsigned int keyScan()
             }
         }
     }
+
+    delay(100);  // In case of shaking
     return result;
 }
 
 unsigned char minutes = 0, seconds = 0;
+__bit statusP2 = 1;
 
 void timer1() __interrupt(3)
 {
@@ -84,6 +87,11 @@ void timer1() __interrupt(3)
                 minutes--;
                 if(minutes)
                     seconds = 59;
+            }
+            if(seconds == 57)  // Turn off the leds
+            {
+                P2 = 0xff;
+                statusP2 = 0;
             }
         }
     }
@@ -121,14 +129,24 @@ int main()
         key = keyScan();
         if(key)
         {
-            minutes = fromKey2Int(key) * 10;
-            seconds = 0;
+            if(statusP2)
+            {
+                minutes = fromKey2Int(key) * 10;
+                seconds = 0;
+            }
+            else
+            {
+                statusP2 = 1;
+            }
+            P2 = ~minutes;  // Show the minutes left on P2
+
+            if(minutes)
+                P1_0 = 0;  // Power on
+            else
+                P1_0 = 1;  // Power off
+
+            delay(500);  // Make the buttons perform better
         }
-        P2 = ~minutes;  // Show the minutes left on P2
-        if(minutes)
-            P1_0 = 0;  // Power on
-        else
-            P1_0 = 1;  // Power off
     }
     return 0;
 }
