@@ -66,7 +66,7 @@ unsigned int keyScan()
     return result;
 }
 
-unsigned char minutes = 0, seconds = 60;
+unsigned char minutes = 0, seconds = 0;
 
 void timer1() __interrupt(3)
 {
@@ -75,12 +75,16 @@ void timer1() __interrupt(3)
     if(t == (unsigned int)(FREQ/3.072))  // 1 second
     {
         t = 0;
-        if(seconds)
-            seconds--;
-        else if(minutes)
+        if(minutes)
         {
-            minutes--;
-            seconds=59;
+            if(seconds)
+                seconds--;
+            else
+            {
+                minutes--;
+                if(minutes)
+                    seconds = 59;
+            }
         }
     }
 }
@@ -118,6 +122,7 @@ int main()
         if(key)
         {
             minutes = fromKey2Int(key) * 10;
+            seconds = 0;
         }
         P2 = ~minutes;  // Show the minutes left on P2
         if(minutes)
