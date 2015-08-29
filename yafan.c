@@ -147,6 +147,10 @@ int main()
 
             delay(500);  // Make the buttons perform better
         }
+        if(minutes)
+            P1_0 = 0;  // Power on
+        else
+            P1_0 = 1;  // Power off
     }
     return 0;
 }
