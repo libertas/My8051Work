@@ -19,17 +19,17 @@ void timer0() __interrupt(IE0_VECTOR)
 
 void timer1() __interrupt(IE1_VECTOR)
 {
-    static t;
+    static unsigned long t;
     t++;
-    if(t > 200)
+    if(t > 10000)
     {
-        //state = 0;
+        state = 0;
         t = 0;
     }
 }
 
 
-unsigned char irCode[32] = {0}, counter;
+unsigned char irCode[32] = {1}, counter;
 
 void int1() __interrupt(TF0_VECTOR)
 {
@@ -42,8 +42,13 @@ void int1() __interrupt(TF0_VECTOR)
             state = 1;
             break;
         case 1:
-            state = 2;
-            counter = 0;
+            if(interval <= 137 && interval >= 133)
+            {
+                state = 2;
+                counter = 0;
+            }
+            else
+                state = 0;
             break;
         case 2:
             if(interval >= 9 && interval <=13)
@@ -65,16 +70,16 @@ void setup()
     EX0 = 1;
     EA = 1;
 
-    TMOD |= 0x02;  // Time0 is running at mod 3
+    TMOD |= 0x02;  // Time0 is running at mod 2
     TH0 = 256-FREQ/120;
     TL0 = 256-FREQ/120;
     TR0 = 1;
     ET0 = 1;
 
-    TMOD |= 0x10;  // Time0 is running at mod 3
-    TH1 = 0;
-    TL1 = 0;
-    TR1 = 1;
+    TMOD |= 0x20;  // Time1 is running at mod 2
+    TH1 = 256-FREQ/120;
+    TL1 = 256-FREQ/120;
+    //TR1 = 1;
     ET1 = 1;
 
     EA = 1;
@@ -82,17 +87,20 @@ void setup()
 
 int main()
 {
-    unsigned char i;
+    unsigned char i, tmp;
     setup();
     while(1)
     {
-        P2 = ~state;
-/*
         for(i = 16; i <24; i++)
         {
-            P2 |= irCode[i] << (23 - i);
+            tmp = irCode[i];
+            if(tmp)
+                P2 |= 1 << (23 - i);
+            else
+            {
+                P2 &= ~(1 << (23 - i));
+            }
         }
-*/
     }
     return 0;
 }
