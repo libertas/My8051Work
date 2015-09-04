@@ -19,7 +19,13 @@ void timer0() __interrupt(IE0_VECTOR)
 
 void timer1() __interrupt(IE1_VECTOR)
 {
-    state = 0;
+    static t;
+    t++;
+    if(t > 200)
+    {
+        //state = 0;
+        t = 0;
+    }
 }
 
 
