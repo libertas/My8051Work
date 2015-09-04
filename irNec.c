@@ -1,60 +1,79 @@
 #include <8052.h>
 
-// F_CPU = 11529000UL
+#define FREQ 11529  // kHz
 
-void delay(unsigned int n)
+unsigned long hundredSeconds = 0;
+
+// state:
+// 0 means not working
+// 1 means the first process
+// 2 means the second process
+unsigned char state = 0;
+
+unsigned long lastTime = 0;
+
+void int0() __interrupt(IE0_VECTOR)
 {
-    while(--n);             // 8 us for one time
+    P2 = hundredSeconds/10000UL;
 }
 
-unsigned char irCode[32] = {0};
+unsigned char irCode[32] = {0}, counter;
 
-void irGetCode()
+void int1() __interrupt(TF0_VECTOR)
 {
-    unsigned int i = 0;
-    while(!P3_2);
-    while(i < 32)
+    unsigned long thisTime, interval;
+    thisTime = hundredSeconds;
+    interval = thisTime - lastTime;
+    switch(state)
     {
-        delay(100);
-        if(P3_2)
-        {
-            irCode[i] = 1;
-            while(P3_2);
-        }
-        else
-        {
-            irCode[i] = 0;
-        }
-        while(!P3_2);
-        i++;
+        case 0:
+            state = 1;
+            break;
+        case 1:
+            state = 2;
+            counter = 0;
+            break;
+        case 2:
+            if(interval >= 9 && interval <=13)
+                irCode[counter] = 0;
+            if(interval >=21 && interval <=24)
+                irCode[counter] = 1;
+            counter++;
+            if(counter==32)
+            {
+                state = 0;
+            }
+            break;
     }
-    P1_0 = 0;
-    delay(65535);
-    P1_0 = 1;
 }
 
-void irScan()
+void setup()
 {
-    while(P3_2);
+    IT0 = 1;
+    EX0 = 1;
+    EA = 1;
 
-    delay(500);
-    if(P3_2)
-        return;
-    while(!P3_2);
-
-    delay(250);
-    if(!P3_2)
-        return;
-    while(P3_2);
-    irGetCode();
+    TMOD |= 0x02;  // Time0 is running at mod 3
+    TH0 = 256-FREQ/120;
+    TL0 = 256-FREQ/120;
+    TR0 = 1;
+    ET0 = 1;
+    EA = 1;
 }
 
 int main()
 {
+    unsigned char i;
+    setup();
     while(1)
     {
-        irScan();
+        P2 = ~state;
+/*
+        for(i = 16; i <24; i++)
+        {
+            P2 |= irCode[i] << (23 - i);
+        }
+*/
     }
     return 0;
 }
-
