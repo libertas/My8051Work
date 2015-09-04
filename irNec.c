@@ -12,10 +12,16 @@ unsigned char state = 0;
 
 unsigned long lastTime = 0;
 
-void int0() __interrupt(IE0_VECTOR)
+void timer0() __interrupt(IE0_VECTOR)
 {
     P2 = hundredSeconds/10000UL;
 }
+
+void timer1() __interrupt(IE1_VECTOR)
+{
+    state = 0;
+}
+
 
 unsigned char irCode[32] = {0}, counter;
 
@@ -58,6 +64,13 @@ void setup()
     TL0 = 256-FREQ/120;
     TR0 = 1;
     ET0 = 1;
+
+    TMOD |= 0x10;  // Time0 is running at mod 3
+    TH1 = 0;
+    TL1 = 0;
+    TR1 = 1;
+    ET1 = 1;
+
     EA = 1;
 }
 
