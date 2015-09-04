@@ -28,15 +28,14 @@ void timer1() __interrupt(TF1_VECTOR)
     }
 }
 
-
-unsigned char irCode[32] = {1}, counter;
+unsigned char irCode[32] = {0}, counter;
 
 void int0() __interrupt(IE0_VECTOR)
 {
-/*
     unsigned long thisTime, interval;
     thisTime = hundredSeconds;
     interval = thisTime - lastTime;
+    lastTime = thisTime;
     switch(state)
     {
         case 0:
@@ -63,8 +62,6 @@ void int0() __interrupt(IE0_VECTOR)
             }
             break;
     }
-*/
-P2 = ~(hundredSeconds/10000UL);
 }
 
 void setup()
@@ -82,7 +79,7 @@ void setup()
     TMOD |= 0x10;  // Time1 is running at mod 2
     TH1 = 0;
     TL1 = 0;
-    TR1 = 1;
+    //TR1 = 1;
     ET1 = 1;
 
     EA = 1;
@@ -94,6 +91,7 @@ int main()
     setup();
     while(1)
     {
+        P2 = ~state;
 /*
         for(i = 16; i <24; i++)
         {
@@ -109,3 +107,4 @@ int main()
     }
     return 0;
 }
+
