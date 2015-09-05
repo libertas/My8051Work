@@ -3,7 +3,7 @@
 
 unsigned long hundredSeconds = 0;
 
-void int0() __interrupt(1)
+void timer0() __interrupt(TF0_VECTOR)
 {
     hundredSeconds++;
 }
