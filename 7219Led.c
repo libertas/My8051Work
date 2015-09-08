@@ -58,21 +58,21 @@ int main()
     P2 = 0;
 
     sendData(0x0c01);
-    sendData(0x0a09);
-    sendData(0x0b03);
+    sendData(0x0a00);
+    sendData(0x0b07);
     sendData(0x0900);
     sendData(0x0f00);
 
     while(1)
     {
-        sendData(0x0111);
-        sendData(0x02ff);
-        sendData(0x03ee);
-        sendData(0x04dd);
-        sendData(0x05ff);
-        sendData(0x06aa);
-        sendData(0x07ee);
-        sendData(0x0888);
+        sendData(0x0101);
+        sendData(0x0202);
+        sendData(0x0303);
+        sendData(0x0404);
+        sendData(0x0505);
+        sendData(0x0606);
+        sendData(0x0707);
+        sendData(0x0808);
     }
     return 0;
 }
