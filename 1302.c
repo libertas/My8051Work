@@ -49,7 +49,7 @@ void write1302(unsigned char addr, unsigned char data)
 
 unsigned char read1302(unsigned char addr)
 {
-    unsigned char i, tmp, data = 0, data1;
+    unsigned char i, tmp, data = 0;
     CE = 0;
     CLK = 0;
     CE = 1;
@@ -78,9 +78,7 @@ unsigned char read1302(unsigned char addr)
         for(tmp=0; tmp<4; tmp++);  // delay
     }
     CE = 0;
-    data1 = data / 16;
-    data = data % 16;
-    return data + data1 * 10;
+    return data;
 }
 
 void setup()
