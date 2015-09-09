@@ -66,6 +66,11 @@ unsigned char read1302(unsigned char addr)
         for(tmp=0; tmp<4; tmp++);  // delay
     }
 
+    // ignoring the first zero bit
+    CLK = 0;
+    for(tmp=0; tmp<4; tmp++);  // delay
+    CLK = 1;
+
     for(i=0; i<8; i++)
     {
         data = data >> 1;
