@@ -1,5 +1,8 @@
 #include <8051.h>
 #define _nop_()	__asm NOP __endasm
+#define IO P1_2
+#define CS P1_3
+#define CLK P1_4
 
 void sendbyte(unsigned char dat)
 {
@@ -10,12 +13,12 @@ void sendbyte(unsigned char dat)
        temp=dat&0x80;
        dat=dat<<1;
        if(temp)
-           P1_3=1;
+           IO=1;
        else
-           P1_3=0;
-       P1_4=0;
+           IO=0;
+       CLK=0;
        _nop_();
-       P1_4=1;         
+       CLK=1;
    }
 }
 
@@ -28,16 +31,16 @@ void sendByte(unsigned char byte)
         tmp = byte & 0x80;
         byte = byte << 1;
         if(tmp)
-            P1_3 = 1;
+            IO = 1;
         else
-            P1_3 = 0;
+            IO = 0;
 
-        P1_4 = 0;
+        CLK = 0;
         _nop_();
         _nop_();
         _nop_();
         _nop_();
-        P1_4 = 1;
+        CLK = 1;
     }
 }
 
@@ -46,10 +49,10 @@ void sendData(unsigned int data)
     unsigned char high, low;
     high = data >> 8;
     low = data;
-    P1_2 = 0;
+    CS = 0;
     sendByte(high);
     sendByte(low);
-    P1_2 = 1;
+    CS = 1;
 }
 
 int main()
