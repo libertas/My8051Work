@@ -7,6 +7,7 @@
 #define READ_MINUTE 0x83 
 #define READ_HOUR 0x85 
 #define WRITE_PROTECT 0x8E 
+#define WRITE_TRICKLE 0x90
 
 #define CE P3_2
 #define IO P3_1
@@ -176,15 +177,17 @@ void timer0() __interrupt(TF0_VECTOR)
 
 int main()
 {
+
     TMOD = 0x02;
     TR0 = 1;
     ET0 = 1;
     EA = 1;
 
     write1302(WRITE_PROTECT, 0x00);
+    write1302(WRITE_TRICKLE, 0xab);
     write1302(WRITE_SECOND, 0x00);
-    write1302(WRITE_MINUTE, 0x00);
-    write1302(WRITE_HOUR, 0x00);
+    write1302(WRITE_MINUTE, 0x46);
+    write1302(WRITE_HOUR, 0x22);
     write1302(WRITE_PROTECT, 0x80);
 
     while(1)
