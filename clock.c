@@ -149,17 +149,42 @@ unsigned char getHour(const unsigned char value) {
   return (value & 15) + adj;
 }
 
+unsigned char hour, minute;
+
+void timer0() __interrupt(TF0_VECTOR)
+{
+    static unsigned char t;
+    switch(t)
+    {
+        case 0:
+            writeDt(1, numbers[hour / 10]);
+            break;
+        case 1:
+            writeDt(2, numbers[hour % 10] | 0x80);
+            break;
+        case 2:
+            writeDt(3, numbers[(minute & 0xf0) >> 4]);
+            break;
+        case 3:
+            writeDt(4, numbers[minute & 0x0f]);
+            break;
+        default:
+            t = -1;
+    }
+    t++;
+}
+
 int main()
 {
-    unsigned char hour, minute;
+    TMOD = 0x02;
+    TR0 = 1;
+    ET0 = 1;
+    EA = 1;
+
     while(1)
     {
         hour = getHour(read1302(READ_HOUR));
         minute = read1302(READ_MINUTE) & 0x7f;
-        writeDt(1, numbers[hour / 10]);
-        writeDt(2, numbers[hour % 10] | 0x80);
-        writeDt(3, numbers[(minute & 0xf0) >> 4]);
-        writeDt(4, numbers[minute & 0x0f]);
     }
     return 0;
 }
