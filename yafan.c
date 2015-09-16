@@ -1,18 +1,18 @@
 #include <8051.h>
 #define FREQ 11529  // kHz
 
-unsigned long hundredSeconds = 0;
+unsigned long hundredMicros = 0;
 
 void timer0() __interrupt(1)
 {
-    hundredSeconds++;
+    hundredMicros++;
 }
 
 void delay(unsigned long ms)
 {
     unsigned long lastTime;
-    lastTime = hundredSeconds;
-    while((hundredSeconds-lastTime) < ms*10);
+    lastTime = hundredMicros;
+    while((hundredMicros-lastTime) < ms*10);
 }
 
 void initDelay()
