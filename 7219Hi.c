@@ -6,6 +6,8 @@
 #define CS P1_3
 #define CLK P1_4
 
+#define IPT P3_2
+
 void sendbyte(unsigned char dat)
 {
     unsigned char i,temp;
@@ -128,12 +130,18 @@ int main()
     TMOD = 0x01;
     TH0 = 0;
     TL0 = 0;
-    TR0 = 1;
     ET0 = 1;
     EA = 1;
 
     while(1)
     {
+        if(IPT)
+        {
+            TR0 = 0;
+            display(img[0]);
+        }
+        else
+            TR0 = 1;
     }
     return 0;
 }
