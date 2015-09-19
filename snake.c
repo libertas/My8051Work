@@ -155,19 +155,62 @@ void init7219()
     }
 }
 
-__bit up = 0, down = 0, left = 0, right = 1, mid = 0;
+#define UP 0
+#define DOWN 1
+#define LEFT 2
+#define RIGHT 3
+#define STOP 4
+unsigned char dir = 1 << DOWN;
 
-unsigned char map[8] = {8};
+unsigned char rawMap[8] = {0x80};
+unsigned char *map[8];
+unsigned char headX = 0, headY = 0;
 
 void go()
 {
-    
+    unsigned char i;
+    unsigned char *tmp;
+
+    switch(dir)
+    {
+        case 1 << UP:
+            break;
+        case 1 << DOWN:
+            headY++;
+            if(headY == 8)
+                headY = 0;
+            tmp = map[7];
+            for(i = 7; i > 0; i--)
+            {
+                map[i] = map[i - 1];
+            }
+            map[0] = tmp;
+            break;
+        case 1 << LEFT:
+            break;
+        case 1 << RIGHT:
+            break;
+        case 1 << STOP:
+            break;
+        default:
+            break;
+    }
+    for(i = 1; i <=8; i++)
+        sendData((0x0100 * i) | *(map[i - 1]));
+}
+
+void initMap()
+{
+    unsigned char i;
+    for(i = 0; i < 8; i++)
+        map[i] = rawMap + i;
 }
 
 int main()
 {
     unsigned int key;
 
+    initMap();
     initDelay();
     init7219();
 
@@ -176,43 +219,23 @@ int main()
         key = keyScan();
         if(key)
         {
-            sendData(0x08ff);
             switch(key)
             {
+                // These should be modified depending on your keyboard
                 case 1 << 6:
-                    up = 1;
-                    down = 0;
-                    left = 0;
-                    right = 0;
-                    mid = 0;
+                    dir = 1 << LEFT;
                     break;
                 case 1 << 9:
-                    up = 0;
-                    down = 0;
-                    left = 1;
-                    right = 0;
-                    mid = 0;
+                    dir = 1 << DOWN;
                     break;
                 case 1 << 1:
-                    up = 0;
-                    down = 0;
-                    left = 0;
-                    right = 1;
-                    mid = 0;
+                    dir = 1 << UP;
                     break;
                 case 1 << 4:
-                    up = 0;
-                    down = 1;
-                    left = 0;
-                    right = 0;
-                    mid = 0;
+                    dir = 1 << RIGHT;
                     break;
                 case 1 << 5:
-                    up = 0;
-                    down = 0;
-                    left = 0;
-                    right = 0;
-                    mid = 1;
+                    dir = 1 << STOP;
                     break;
                 default:
                     break;
