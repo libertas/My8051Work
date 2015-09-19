@@ -162,14 +162,13 @@ void init7219()
 #define STOP 4
 unsigned char dir = 1 << DOWN;
 
-unsigned char rawMap[8] = {0x80};
-unsigned char *map[8];
+unsigned char map[8] = {0x80};
 unsigned char headX = 0, headY = 0;
 
 void go()
 {
     unsigned char i;
-    unsigned char *tmp, tmpValue;
+    unsigned char tmp;
 
     switch(dir)
     {
@@ -201,8 +200,8 @@ void go()
                 headX = 7;
             for(i = 0; i < 8; i++)
             {
-                tmpValue = (*map[i] & 0x80) >> 7;
-                *map[i] = (*map[i] << 1) | tmpValue;
+                tmp = (map[i] & 0x80) >> 7;
+                map[i] = (map[i] << 1) | tmp;
             }
             break;
         case 1 << RIGHT:
@@ -211,8 +210,8 @@ void go()
                 headX = 0;
             for(i = 0; i < 8; i++)
             {
-                tmpValue = (*map[i] & 0x01) << 7;
-                *map[i] = (*map[i] >> 1) | tmpValue;
+                tmp = (map[i] & 0x01) << 7;
+                map[i] = (map[i] >> 1) | tmp;
             }
             break;
         case 1 << STOP:
@@ -221,21 +220,13 @@ void go()
             break;
     }
     for(i = 1; i <=8; i++)
-        sendData((0x0100 * i) | *map[i - 1]);
-}
-
-void initMap()
-{
-    unsigned char i;
-    for(i = 0; i < 8; i++)
-        map[i] = rawMap + i;
+        sendData((0x0100 * i) | map[i - 1]);
 }
 
 int main()
 {
     unsigned int key;
 
-    initMap();
     initDelay();
     init7219();
 
