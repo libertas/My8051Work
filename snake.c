@@ -169,11 +169,20 @@ unsigned char headX = 0, headY = 0;
 void go()
 {
     unsigned char i;
-    unsigned char *tmp;
+    unsigned char *tmp, tmpValue;
 
     switch(dir)
     {
         case 1 << UP:
+            headY--;
+            if(headY == -1)
+                headY = 7;
+            tmp = map[0];
+            for(i = 0; i < 7; i++)
+            {
+                map[i] = map[i + 1];
+            }
+            map[7] = tmp;
             break;
         case 1 << DOWN:
             headY++;
@@ -187,8 +196,24 @@ void go()
             map[0] = tmp;
             break;
         case 1 << LEFT:
+            headX--;
+            if(headX == -1)
+                headX = 7;
+            for(i = 0; i < 8; i++)
+            {
+                tmpValue = (*map[i] & 0x80) >> 7;
+                *map[i] = (*map[i] << 1) | tmpValue;
+            }
             break;
         case 1 << RIGHT:
+            headX++;
+            if(headX == 8)
+                headX = 0;
+            for(i = 0; i < 8; i++)
+            {
+                tmpValue = (*map[i] & 0x01) << 7;
+                *map[i] = (*map[i] >> 1) | tmpValue;
+            }
             break;
         case 1 << STOP:
             break;
@@ -196,7 +221,7 @@ void go()
             break;
     }
     for(i = 1; i <=8; i++)
-        sendData((0x0100 * i) | *(map[i - 1]));
+        sendData((0x0100 * i) | *map[i - 1]);
 }
 
 void initMap()
