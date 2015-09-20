@@ -167,17 +167,13 @@ uint8_t dir = 1 << DOWN;
 uint8_t snakeBody[8][8] = {{0}};
 uint8_t headX = 0, headY = 0;
 
-void go()
+inline void getLast(uint8_t *x, uint8_t *y)
 {
-    uint8_t map[8] = {0};
-    uint8_t i, j;
-    uint8_t tmp;
-    uint8_t tmpX, tmpY;
-    uint8_t nextX, nextY;
+    uint8_t tmp = snakeBody[headY][headX];
 
-    tmp = snakeBody[headY][headX];
-    tmpX = headX;
-    tmpY = headY;
+    *x = headX;
+    *y = headY;
+
     if(snakeBody[headY][headX] != 0xff)
     {
         while(1)
@@ -185,15 +181,25 @@ void go()
             tmp = snakeBody[(tmp & 0xf0) >> 4][tmp & 0x0f];
             if(tmp != 0xff)
             {
-                tmpY = (tmp & 0xf0) >> 4;
-                tmpX = tmp & 0x0f;
+                *x = (tmp & 0xf0) >> 4;
+                *y = tmp & 0x0f;
             }
             else
                 break;
         }
     }
+}
 
-    snakeBody[tmpY][tmpX] = 0xff;
+void go()
+{
+    uint8_t map[8] = {0};
+    uint8_t i, j;
+    uint8_t lastX, lastY;
+    uint8_t nextX, nextY;
+
+    getLast(&lastX, &lastY);
+
+    snakeBody[lastY][lastX] = 0xff;
 
     switch(dir)
     {
@@ -249,6 +255,16 @@ void go()
         sendData((0x0100 * i) | map[i - 1]);
 }
 
+uint8_t appleX = 3, appleY = 3;
+
+void eat()
+{
+    if(headX == appleX && headY == appleY)
+    {
+        
+    }
+}
+
 void initSnakeBody()
 {
     uint8_t i, j;
@@ -259,7 +275,6 @@ void initSnakeBody()
 
 int main()
 {
-    uint16_t i = -1;
     uint16_t key;
 
     initDelay();
@@ -294,7 +309,7 @@ int main()
             }
         }
         go();
-        while(i--);
+        eat();
     }
     return 0;
 }
