@@ -1,12 +1,14 @@
 #include <8051.h>
+#include <stdint.h>
+
 #define _nop_()	__asm NOP __endasm
 #define IO P3_2
 #define CS P3_3
 #define CLK P3_4
 
-void sendbyte(unsigned char dat)
+void sendbyte(uint8_t dat)
 {
-    unsigned char i,temp;
+    uint8_t i,temp;
     _nop_();
     for (i=0;i<8;i++)
    {
@@ -22,9 +24,9 @@ void sendbyte(unsigned char dat)
    }
 }
 
-void sendByte(unsigned char byte)
+void sendByte(uint8_t byte)
 {
-    unsigned char i, tmp;
+    uint8_t i, tmp;
     _nop_();
     for(i=0; i<8; i++)
     {
@@ -44,9 +46,9 @@ void sendByte(unsigned char byte)
     }
 }
 
-void sendData(unsigned int data)
+void sendData(uint16_t data)
 {
-    unsigned char high, low;
+    uint8_t high, low;
     high = data >> 8;
     low = data;
     CS = 0;
@@ -83,13 +85,13 @@ void initDelay()
     EA = 1;
 }
 
-unsigned int keyScan()
+uint16_t keyScan()
 {
     // Higher bits of tmp store rows while lower store columns
-    unsigned char tmp1, tmp2;
+    uint8_t tmp1, tmp2;
 
-    unsigned int result = 0;
-    unsigned char row, col;
+    uint16_t result = 0;
+    uint8_t row, col;
 
     // Scan colums
     KEYPORT = 0x0f;
@@ -127,9 +129,9 @@ unsigned int keyScan()
 }
 
 // Get the lowest number from the keys pressed
-unsigned char fromKey2Int(unsigned int key)
+uint8_t fromKey2Int(uint16_t key)
 {
-    unsigned char i;
+    uint8_t i;
     for(i=0; i<16; i++)
     {
         if(key&1<<i)
@@ -141,7 +143,7 @@ unsigned char fromKey2Int(unsigned int key)
 
 void init7219()
 {
-    unsigned int i;
+    uint16_t i;
 
     sendData(0x0c01);
     sendData(0x0a00);
@@ -160,75 +162,109 @@ void init7219()
 #define LEFT 2
 #define RIGHT 3
 #define STOP 4
-unsigned char dir = 1 << DOWN;
+uint8_t dir = 1 << DOWN;
 
-unsigned char map[8] = {0x80};
-unsigned char headX = 0, headY = 0;
+uint8_t snakeBody[8][8] = {{0}};
+uint8_t headX = 0, headY = 0;
 
 void go()
 {
-    unsigned char i;
-    unsigned char tmp;
+    uint8_t map[8] = {0};
+    uint8_t i, j;
+    uint8_t tmp;
+    uint8_t tmpX, tmpY;
+    uint8_t nextX, nextY;
+
+    tmp = snakeBody[headY][headX];
+    tmpX = headX;
+    tmpY = headY;
+    if(snakeBody[headY][headX] != 0xff)
+    {
+        while(1)
+        {
+            tmp = snakeBody[(tmp & 0xf0) >> 4][tmp & 0x0f];
+            if(tmp != 0xff)
+            {
+                tmpY = (tmp & 0xf0) >> 4;
+                tmpX = tmp & 0x0f;
+            }
+            else
+                break;
+        }
+    }
+
+    snakeBody[tmpY][tmpX] = 0xff;
 
     switch(dir)
     {
         case 1 << UP:
-            headY--;
-            if(headY == -1)
-                headY = 7;
-            tmp = map[0];
-            for(i = 0; i < 7; i++)
-            {
-                map[i] = map[i + 1];
-            }
-            map[7] = tmp;
+            nextX = headX;
+            if(headY == 0)
+                nextY = 7;
+            else
+                nextY = headY - 1;
             break;
         case 1 << DOWN:
-            headY++;
-            if(headY == 8)
-                headY = 0;
-            tmp = map[7];
-            for(i = 7; i > 0; i--)
-            {
-                map[i] = map[i - 1];
-            }
-            map[0] = tmp;
-            break;
-        case 1 << LEFT:
-            headX--;
-            if(headX == -1)
-                headX = 7;
-            for(i = 0; i < 8; i++)
-            {
-                tmp = (map[i] & 0x80) >> 7;
-                map[i] = (map[i] << 1) | tmp;
-            }
+            nextX = headX;
+            if(headY == 7)
+                nextY = 0;
+            else
+                nextY = headY + 1;
             break;
         case 1 << RIGHT:
-            headX++;
-            if(headX == 8)
-                headX = 0;
-            for(i = 0; i < 8; i++)
-            {
-                tmp = (map[i] & 0x01) << 7;
-                map[i] = (map[i] >> 1) | tmp;
-            }
+            nextY = headY;
+            if(headX == 7)
+                nextX = 0;
+            else
+                nextX = headX + 1;
+            break;
+        case 1 << LEFT:
+            nextY = headY;
+            if(headX == 0)
+                nextX = 7;
+            else
+                nextX = headX - 1;
             break;
         case 1 << STOP:
             break;
         default:
             break;
     }
+
+    snakeBody[nextY][nextX] = (headY << 4) | headX;
+    headY = nextY;
+    headX = nextX;
+
+    for(i = 0; i < 8; i++)
+    {
+        for(j = 0; j < 8; j++)
+        {
+            map[i] = map[i] << 1;
+            if(snakeBody[i][j] != 0xff)
+                map[i] |= 0x01;
+        }
+    }
+
     for(i = 1; i <=8; i++)
         sendData((0x0100 * i) | map[i - 1]);
 }
 
+void initSnakeBody()
+{
+    uint8_t i, j;
+    for(i = 0; i < 8; i++)
+        for(j = 0; j < 8; j++)
+            snakeBody[i][j] = 0xff;
+}
+
 int main()
 {
-    unsigned int key;
+    uint16_t i = -1;
+    uint16_t key;
 
     initDelay();
     init7219();
+    initSnakeBody();
 
     while(1)
     {
@@ -258,6 +294,7 @@ int main()
             }
         }
         go();
+        while(i--);
     }
     return 0;
 }
