@@ -281,7 +281,6 @@ uint8_t appleX = 3, appleY = 3;
 
 void eat()
 {
-    uint8_t map[8] = {0};
     uint8_t lastX, lastY, tmp;
     if(headX == appleX && headY == appleY)
     {
@@ -292,34 +291,37 @@ void eat()
             lastY = (tmp & 0xf0) >> 4;
             lastX = tmp & 0x0f;
         }
-
-        snakeBody[lastY][lastX] = 0;
+        else
+        {
+            lastY = headY;
+            lastX = headX;
+        }
 
         switch(dir)
         {
             case 1 << UP:
-                if(lastY == 0)
-                    snakeBody[lastY][lastX] = (7 << 4) | lastX;
-                else
-                    snakeBody[lastY][lastX] = ((lastY - 1) << 4) | lastX;
-                break;
-            case 1 << DOWN:
                 if(lastY == 7)
                     snakeBody[lastY][lastX] = (0 << 4) | lastX;
                 else
                     snakeBody[lastY][lastX] = ((lastY + 1) << 4) | lastX;
                 break;
-            case 1 << LEFT:
-                if(lastX == 0)
-                    snakeBody[lastY][lastX] = lastY | 7;
+            case 1 << DOWN:
+                if(lastY == 0)
+                    snakeBody[lastY][lastX] = (7 << 4) | lastX;
                 else
-                    snakeBody[lastY][lastX] = lastY | (lastX - 1);
+                    snakeBody[lastY][lastX] = ((lastY - 1) << 4) | lastX;
+                break;
+            case 1 << LEFT:
+                if(lastX == 7)
+                    snakeBody[lastY][lastX] = (lastY << 4) | 0;
+                else
+                    snakeBody[lastY][lastX] = (lastY << 4) | (lastX + 1);
                 break;
             case 1 << RIGHT:
-                if(lastX == 7)
-                    snakeBody[lastY][lastX] = lastY | 0;
+                if(lastX == 0)
+                    snakeBody[lastY][lastX] = (lastY << 4) | 7;
                 else
-                    snakeBody[lastY][lastX] = lastY | (lastX + 1);
+                    snakeBody[lastY][lastX] = (lastY << 4) | (lastX - 1);
                 break;
             case 1 << STOP:
                 break;
@@ -348,8 +350,6 @@ int main()
     initDelay();
     init7219();
     initSnakeBody();
-    snakeBody[0][0] = 0x01;
-    snakeBody[0][1] = 0x02;
 
     while(1)
     {
@@ -379,7 +379,7 @@ int main()
             }
         }
         go();
-        //eat();
+        eat();
         while(COUNTER--);
     }
     return 0;
