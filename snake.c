@@ -167,7 +167,7 @@ uint8_t dir = 1 << DOWN;
 uint8_t snakeBody[8][8] = {{0}};
 uint8_t headX = 0, headY = 0;
 
-void getLast(uint8_t *x, uint8_t *y)
+void getTail(uint8_t *x, uint8_t *y)
 {
     uint8_t tmp;
 
@@ -207,7 +207,7 @@ void displayMap()
         }
     }
 
-    getLast(&lastX, &lastY);
+    getTail(&lastX, &lastY);
     if(snakeBody[headY][headX] != 0xff)
     {
         tmp = snakeBody[lastY][lastX];
@@ -264,7 +264,7 @@ void go()
             break;
     }
 
-    getLast(&lastX, &lastY);
+    getTail(&lastX, &lastY);
 
     if(snakeBody[headY][headX] != 0xff)
     {
@@ -284,7 +284,7 @@ void eat()
     uint8_t lastX, lastY, tmp;
     if(headX == appleX && headY == appleY)
     {
-        getLast(&lastX, &lastY);
+        getTail(&lastX, &lastY);
         if(snakeBody[headY][headX] != 0xff)
         {
             tmp = snakeBody[lastY][lastY];
@@ -344,7 +344,7 @@ void initSnakeBody()
 
 int main()
 {
-    uint16_t COUNTER = 0xffff;
+    uint16_t delayCounter = 0xff;
     uint16_t key;
 
     initDelay();
@@ -380,7 +380,7 @@ int main()
         }
         go();
         eat();
-        while(COUNTER--);
+        while(--delayCounter);
     }
     return 0;
 }
