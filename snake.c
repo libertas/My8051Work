@@ -344,7 +344,7 @@ void initSnakeBody()
 
 int main()
 {
-    uint16_t delayCounter = 0xff;
+    uint16_t delayCounter;
     uint16_t key;
 
     initDelay();
@@ -380,7 +380,8 @@ int main()
         }
         go();
         eat();
-        while(--delayCounter);
+        delayCounter = 0x7fff;
+        while(delayCounter--);
     }
     return 0;
 }
