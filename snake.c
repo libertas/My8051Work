@@ -277,7 +277,7 @@ void go()
     displayMap();
 }
 
-uint8_t appleX = 3, appleY = 3;
+uint8_t appleX = 0, appleY = 3;
 
 void eat()
 {
@@ -350,6 +350,12 @@ int main()
     initDelay();
     init7219();
     initSnakeBody();
+    /*
+    snakeBody[0][0] = 0x01;
+    snakeBody[0][1] = 0x02;
+    snakeBody[0][2] = 0x03;
+    snakeBody[0][3] = 0x04;
+    */
 
     while(1)
     {
