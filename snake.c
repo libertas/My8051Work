@@ -194,7 +194,7 @@ void getTail(uint8_t *x, uint8_t *y)
 void displayMap()
 {
     unsigned int i, j, tmp;
-    uint8_t lastX, lastY;
+    uint8_t tailX, tailY;
     uint8_t map[8] = {0};
 
     for(i = 0; i < 8; i++)
@@ -207,10 +207,10 @@ void displayMap()
         }
     }
 
-    getTail(&lastX, &lastY);
+    getTail(&tailX, &tailY);
     if(snakeBody[headY][headX] != 0xff)
     {
-        tmp = snakeBody[lastY][lastX];
+        tmp = snakeBody[tailY][tailX];
         map[(tmp & 0xf0) >> 4] |= 0x80 >> (tmp & 0x0f);
     }
     else
@@ -225,7 +225,7 @@ void displayMap()
 void go()
 {
     uint8_t tmp;
-    uint8_t lastX, lastY;
+    uint8_t tailX, tailY;
     uint8_t nextX, nextY;
 
     switch(dir)
@@ -264,11 +264,11 @@ void go()
             break;
     }
 
-    getTail(&lastX, &lastY);
+    getTail(&tailX, &tailY);
 
     if(snakeBody[headY][headX] != 0xff)
     {
-        snakeBody[lastY][lastX] = 0xff;
+        snakeBody[tailY][tailX] = 0xff;
         snakeBody[nextY][nextX] = (headY << 4) | headX;
     }
     headY = nextY;
@@ -281,47 +281,47 @@ uint8_t appleX = 3, appleY = 3;
 
 void eat()
 {
-    uint8_t lastX, lastY, tmp;
+    uint8_t tailX, tailY, tmp;
     if(headX == appleX && headY == appleY)
     {
-        getTail(&lastX, &lastY);
+        getTail(&tailX, &tailY);
         if(snakeBody[headY][headX] != 0xff)
         {
-            tmp = snakeBody[lastY][lastY];
-            lastY = (tmp & 0xf0) >> 4;
-            lastX = tmp & 0x0f;
+            tmp = snakeBody[tailY][tailY];
+            tailY = (tmp & 0xf0) >> 4;
+            tailX = tmp & 0x0f;
         }
         else
         {
-            lastY = headY;
-            lastX = headX;
+            tailY = headY;
+            tailX = headX;
         }
 
         switch(dir)
         {
             case 1 << UP:
-                if(lastY == 7)
-                    snakeBody[lastY][lastX] = (0 << 4) | lastX;
+                if(tailY == 7)
+                    snakeBody[tailY][tailX] = (0 << 4) | tailX;
                 else
-                    snakeBody[lastY][lastX] = ((lastY + 1) << 4) | lastX;
+                    snakeBody[tailY][tailX] = ((tailY + 1) << 4) | tailX;
                 break;
             case 1 << DOWN:
-                if(lastY == 0)
-                    snakeBody[lastY][lastX] = (7 << 4) | lastX;
+                if(tailY == 0)
+                    snakeBody[tailY][tailX] = (7 << 4) | tailX;
                 else
-                    snakeBody[lastY][lastX] = ((lastY - 1) << 4) | lastX;
+                    snakeBody[tailY][tailX] = ((tailY - 1) << 4) | tailX;
                 break;
             case 1 << LEFT:
-                if(lastX == 7)
-                    snakeBody[lastY][lastX] = (lastY << 4) | 0;
+                if(tailX == 7)
+                    snakeBody[tailY][tailX] = (tailY << 4) | 0;
                 else
-                    snakeBody[lastY][lastX] = (lastY << 4) | (lastX + 1);
+                    snakeBody[tailY][tailX] = (tailY << 4) | (tailX + 1);
                 break;
             case 1 << RIGHT:
-                if(lastX == 0)
-                    snakeBody[lastY][lastX] = (lastY << 4) | 7;
+                if(tailX == 0)
+                    snakeBody[tailY][tailX] = (tailY << 4) | 7;
                 else
-                    snakeBody[lastY][lastX] = (lastY << 4) | (lastX - 1);
+                    snakeBody[tailY][tailX] = (tailY << 4) | (tailX - 1);
                 break;
             case 1 << STOP:
                 break;
