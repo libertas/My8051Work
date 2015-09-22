@@ -366,19 +366,23 @@ int main()
             {
                 // These should be modified depending on your keyboard
                 case 1 << 6:
-                    dir = 1 << LEFT;
+                    if(dir != 1 << RIGHT)
+                        dir = 1 << LEFT;
                     break;
                 case 1 << 9:
-                    dir = 1 << DOWN;
+                    if(dir != 1 << UP)
+                        dir = 1 << DOWN;
                     break;
                 case 1 << 1:
-                    dir = 1 << UP;
+                    if(dir != 1 << DOWN)
+                        dir = 1 << UP;
                     break;
                 case 1 << 4:
-                    dir = 1 << RIGHT;
+                    if(dir != 1 << LEFT)
+                        dir = 1 << RIGHT;
                     break;
-                case 1 << 5:
-                    dir = 1 << STOP;
+                //case 1 << 5:
+                //    dir = 1 << STOP;
                     break;
                 default:
                     break;
