@@ -281,7 +281,7 @@ uint8_t appleX = 0, appleY = 3;
 
 void eat()
 {
-    uint8_t tailX, tailY, tmp;
+    uint8_t tailX, tailY, tmp, leftPos, rightPos, upPos, downPos;
     if(headX == appleX && headY == appleY)
     {
         getTail(&tailX, &tailY);
@@ -297,40 +297,56 @@ void eat()
             tailX = headX;
         }
 
-        switch(dir)
+        leftPos = tailY << 4;
+        rightPos = tailY << 4;
+        upPos = tailX;
+        downPos = tailX;
+
+        switch(tailX)
         {
-            case 1 << UP:
-                if(tailY == 7)
-                    snakeBody[tailY][tailX] = (0 << 4) | tailX;
-                else
-                    snakeBody[tailY][tailX] = ((tailY + 1) << 4) | tailX;
+            case 0:
+                leftPos |= 7;
+                rightPos |= tailX + 1;
                 break;
-            case 1 << DOWN:
-                if(tailY == 0)
-                    snakeBody[tailY][tailX] = (7 << 4) | tailX;
-                else
-                    snakeBody[tailY][tailX] = ((tailY - 1) << 4) | tailX;
-                break;
-            case 1 << LEFT:
-                if(tailX == 7)
-                    snakeBody[tailY][tailX] = (tailY << 4) | 0;
-                else
-                    snakeBody[tailY][tailX] = (tailY << 4) | (tailX + 1);
-                break;
-            case 1 << RIGHT:
-                if(tailX == 0)
-                    snakeBody[tailY][tailX] = (tailY << 4) | 7;
-                else
-                    snakeBody[tailY][tailX] = (tailY << 4) | (tailX - 1);
-                break;
-            case 1 << STOP:
+            case 7:
+                leftPos |= tailX - 1;
+                rightPos |= 0;
                 break;
             default:
+                rightPos |= tailX + 1;
+                leftPos |= tailX - 1;
                 break;
         }
 
-        displayMap();
+        switch(tailY)
+        {
+            case 0:
+                upPos |= 7 << 4;
+                downPos |= (tailX + 1)  << 4;
+                break;
+            case 7:
+                upPos |= (tailX - 1)  << 4;
+                downPos |= 0  << 4;
+                break;
+            default:
+                downPos |= (tailX + 1)  << 4;
+                upPos |= (tailX - 1)  << 4;
+                break;
+        }
 
+        if(snakeBody[(leftPos & 0xf0) >> 4][leftPos & 0x0f] == 0xff)
+            snakeBody[tailY][tailX] = leftPos;
+
+        if(snakeBody[(rightPos & 0xf0) >> 4][rightPos & 0x0f] == 0xff)
+            snakeBody[tailY][tailX] = rightPos;
+
+        if(snakeBody[(upPos & 0xf0) >> 4][upPos & 0x0f] == 0xff)
+            snakeBody[tailY][tailX] = upPos;
+
+        if(snakeBody[(downPos & 0xf0) >> 4][downPos & 0x0f] == 0xff)
+            snakeBody[tailY][tailX] = downPos;
+
+        displayMap();
     }
 }
 
