@@ -287,7 +287,7 @@ void eat()
         getTail(&tailX, &tailY);
         if(snakeBody[headY][headX] != 0xff)
         {
-            tmp = snakeBody[tailY][tailY];
+            tmp = snakeBody[tailY][tailX];
             tailY = (tmp & 0xf0) >> 4;
             tailX = tmp & 0x0f;
         }
