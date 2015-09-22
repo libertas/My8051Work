@@ -365,23 +365,23 @@ int main()
             switch(key)
             {
                 // These should be modified depending on your keyboard
-                case 1 << 6:
+                case 1 << 10:
                     if(dir != 1 << RIGHT)
                         dir = 1 << LEFT;
                     break;
-                case 1 << 9:
+                case 1 << 13:
                     if(dir != 1 << UP)
                         dir = 1 << DOWN;
                     break;
-                case 1 << 1:
+                case 1 << 5:
                     if(dir != 1 << DOWN)
                         dir = 1 << UP;
                     break;
-                case 1 << 4:
+                case 1 << 8:
                     if(dir != 1 << LEFT)
                         dir = 1 << RIGHT;
                     break;
-                //case 1 << 5:
+                //case 1 << 9:
                 //    dir = 1 << STOP;
                     break;
                 default:
