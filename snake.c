@@ -167,7 +167,7 @@ uint8_t dir = 1 << DOWN;
 
 uint8_t snakeBody[8][8] = {{0}};
 uint8_t headX = 0, headY = 0;
-uint8_t appleX = 3, appleY = 3;
+uint8_t appleX, appleY;
 
 void getTail(uint8_t *x, uint8_t *y)
 {
@@ -368,7 +368,7 @@ void eat()
             randomApple();
         }
 
-        displayMap();
+        //displayMap();
     }
 }
 
@@ -387,6 +387,7 @@ int main()
 
     initDelay();
     init7219();
+    randomApple();
     initSnakeBody();
     /*
     snakeBody[0][0] = 0x01;
