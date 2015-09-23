@@ -166,6 +166,7 @@ uint8_t dir = 1 << DOWN;
 
 uint8_t snakeBody[8][8] = {{0}};
 uint8_t headX = 0, headY = 0;
+uint8_t appleX = 0, appleY = 3;
 
 void getTail(uint8_t *x, uint8_t *y)
 {
@@ -193,6 +194,7 @@ void getTail(uint8_t *x, uint8_t *y)
 
 void displayMap()
 {
+    static uint8_t appleFlag;
     unsigned int i, j, tmp;
     uint8_t tailX, tailY;
     uint8_t map[8] = {0};
@@ -217,6 +219,10 @@ void displayMap()
     {
         map[headY] |= 0x80 >> headX;
     }
+
+    if(appleFlag)
+        map[appleY] |= 0x80 >> appleX;
+    appleFlag = !appleFlag;
 
     for(i = 1; i <=8; i++)
         sendData((0x0100 * i) | map[i - 1]);
@@ -276,8 +282,6 @@ void go()
 
     displayMap();
 }
-
-uint8_t appleX = 0, appleY = 3;
 
 void eat()
 {
