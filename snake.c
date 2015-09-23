@@ -1,5 +1,6 @@
 #include <8051.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #define _nop_()	__asm NOP __endasm
 #define IO P3_2
@@ -166,7 +167,7 @@ uint8_t dir = 1 << DOWN;
 
 uint8_t snakeBody[8][8] = {{0}};
 uint8_t headX = 0, headY = 0;
-uint8_t appleX = 0, appleY = 3;
+uint8_t appleX = 3, appleY = 3;
 
 void getTail(uint8_t *x, uint8_t *y)
 {
@@ -230,7 +231,6 @@ void displayMap()
 
 void go()
 {
-    uint8_t tmp;
     uint8_t tailX, tailY;
     uint8_t nextX, nextY;
 
@@ -281,6 +281,12 @@ void go()
     headX = nextX;
 
     displayMap();
+}
+
+void randomApple()
+{
+    appleY = rand() % 8;
+    appleX = rand() % 8;
 }
 
 void eat()
@@ -339,16 +345,28 @@ void eat()
         }
 
         if(snakeBody[(leftPos & 0xf0) >> 4][leftPos & 0x0f] == 0xff)
+        {
             snakeBody[tailY][tailX] = leftPos;
+            randomApple();
+        }
 
         if(snakeBody[(rightPos & 0xf0) >> 4][rightPos & 0x0f] == 0xff)
+        {
             snakeBody[tailY][tailX] = rightPos;
+            randomApple();
+        }
 
         if(snakeBody[(upPos & 0xf0) >> 4][upPos & 0x0f] == 0xff)
+        {
             snakeBody[tailY][tailX] = upPos;
+            randomApple();
+        }
 
         if(snakeBody[(downPos & 0xf0) >> 4][downPos & 0x0f] == 0xff)
+        {
             snakeBody[tailY][tailX] = downPos;
+            randomApple();
+        }
 
         displayMap();
     }
