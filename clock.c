@@ -151,6 +151,21 @@ unsigned char getHour(const unsigned char value) {
 }
 
 unsigned char hour, minute;
+unsigned char point = 0x80;
+
+void timer1() __interrupt(TF1_VECTOR)
+{
+    static unsigned char t;
+    t++;
+    if(t == 5)
+    {
+        t = 0;
+        if(point == 0x80)
+            point = 0;
+        else
+            point = 0x80;
+    }
+}
 
 void timer0() __interrupt(TF0_VECTOR)
 {
@@ -161,7 +176,7 @@ void timer0() __interrupt(TF0_VECTOR)
             writeDt(1, numbers[hour / 10]);
             break;
         case 1:
-            writeDt(2, numbers[hour % 10] | 0x80);
+            writeDt(2, numbers[hour % 10] | point);
             break;
         case 2:
             writeDt(3, numbers[(minute & 0xf0) >> 4]);
@@ -178,16 +193,18 @@ void timer0() __interrupt(TF0_VECTOR)
 int main()
 {
 
-    TMOD = 0x02;
+    TMOD = 0x12;
     TR0 = 1;
     ET0 = 1;
+    TR1 = 1;
+    ET1 = 1;
     EA = 1;
 /*
     write1302(WRITE_PROTECT, 0x00);
     write1302(WRITE_TRICKLE, 0xab);
     write1302(WRITE_SECOND, 0x00);
-    write1302(WRITE_MINUTE, 0x05);
-    write1302(WRITE_HOUR, 0x17);
+    write1302(WRITE_MINUTE, 0x00);
+    write1302(WRITE_HOUR, 0x00);
     write1302(WRITE_PROTECT, 0x80);
 */
     while(1)
