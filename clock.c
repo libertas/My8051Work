@@ -182,14 +182,14 @@ int main()
     TR0 = 1;
     ET0 = 1;
     EA = 1;
-
+/*
     write1302(WRITE_PROTECT, 0x00);
     write1302(WRITE_TRICKLE, 0xab);
     write1302(WRITE_SECOND, 0x00);
-    write1302(WRITE_MINUTE, 0x46);
-    write1302(WRITE_HOUR, 0x22);
+    write1302(WRITE_MINUTE, 0x05);
+    write1302(WRITE_HOUR, 0x17);
     write1302(WRITE_PROTECT, 0x80);
-
+*/
     while(1)
     {
         hour = getHour(read1302(READ_HOUR));
