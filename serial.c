@@ -12,9 +12,11 @@ void serial(void) __interrupt(SI0_VECTOR)
         {
             case '0':
                 P1_0 = 0;
+                SBUF = '0';
                 break;
             case '1':
                 P1_0 = 1;
+                SBUF = '1';
                 break;
         }
     }
