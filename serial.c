@@ -28,11 +28,13 @@ int main()
 {
     SCON = 0x50;
     TMOD = 0x20;
+    // 11.529 Mhz
     TH1 = 0xfd;
     TL1 = 0xfd;
     TR1 = 1;
     ES = 1;
     EA = 1;
+    P1_0 = 0;
     while(1)
     {
     }
