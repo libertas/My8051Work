@@ -89,7 +89,6 @@ void uart() __interrupt(TF1_VECTOR)
 				RBUF = RDAT;
 				RING = 0;
 				REND = 1;
-				sendUART(receiveUART());
 			}
 			else
 			{
@@ -322,7 +321,7 @@ int main()
 	TCNT = 0;
 	RCNT = 0;
 
-    EA = 1;
+	EA = 1;
 
 	// Set up the clock for the first time
 	/*
@@ -338,7 +337,9 @@ int main()
     {
         hour = getHour(read1302(READ_HOUR));
         minute = read1302(READ_MINUTE) & 0x7f;
-		printf("Hi!\n");
+		printf("Hello,World!\n");
+		while(!REND);
+		putchar(receiveUART());
     }
     return 0;
 }
