@@ -1,3 +1,5 @@
+// Running on a STC15F204EA
+
 #include <8051.h>
 
 #define WRITE_SECOND 0x80 
