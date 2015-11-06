@@ -1,6 +1,7 @@
 // Running on a STC15F204EA at 11.0529 MHz
 
 #include <stc12.h>
+#include <stdio.h>
 
 // Version A only
 #define RXB P0_0
@@ -54,6 +55,28 @@ byte TBIT, RBIT;
 bool TING, RING;
 bool TEND, REND;
 
+void sendUART(unsigned char data)
+{
+	if(TEND)
+	{
+		TEND = 0;
+		TBUF = data;
+		TING = 1;
+	}
+}
+
+void putchar(char c)
+{
+	while(!TEND);
+	sendUART(c);
+}
+
+unsigned char receiveUART()
+{
+	REND = 0;
+	return RBUF;
+}
+
 void uart() __interrupt(TF1_VECTOR)
 {
 	if(RING)
@@ -66,6 +89,7 @@ void uart() __interrupt(TF1_VECTOR)
 				RBUF = RDAT;
 				RING = 0;
 				REND = 1;
+				sendUART(receiveUART());
 			}
 			else
 			{
@@ -109,22 +133,6 @@ void uart() __interrupt(TF1_VECTOR)
 			}
 		}
 	}
-}
-
-void sendUART(unsigned char data)
-{
-	if(TEND)
-	{
-		TEND = 0;
-		TBUF = data;
-		TING = 1;
-	}
-}
-
-unsigned char receiveUART()
-{
-	REND = 0;
-	return RBUF;
 }
 
 unsigned char numbers[10] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
@@ -293,7 +301,6 @@ void timer0() __interrupt(TF0_VECTOR)
 
 int main()
 {
-
     TMOD = 0x02;
 
     TR0 = 1;
@@ -331,7 +338,7 @@ int main()
     {
         hour = getHour(read1302(READ_HOUR));
         minute = read1302(READ_MINUTE) & 0x7f;
-		sendUART('h');
+		printf("Hi!\n");
     }
     return 0;
 }
