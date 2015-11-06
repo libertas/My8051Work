@@ -1,6 +1,19 @@
-// Running on a STC15F204EA
+// Running on a STC15F204EA at 11.0529 MHz
 
-#include <8051.h>
+#include <stc12.h>
+
+// Version A only
+#define RXB P0_0
+#define TXB P0_1
+
+// Version B only
+/*
+#define RXB P5_4
+#define TXB P5_5
+*/
+
+#define BAUD 0xfe80 // 9600 at 11.0529 MHz
+
 
 #define WRITE_SECOND 0x80 
 #define WRITE_MINUTE 0x82 
@@ -28,6 +41,91 @@
 #define DF P3_7
 #define DG P1_6
 #define DP P1_4
+
+
+typedef __bit bool;
+typedef unsigned char byte;
+typedef unsigned int word;
+
+byte TBUF, RBUF;
+byte TDAT, RDAT;
+byte TCNT, RCNT;
+byte TBIT, RBIT;
+bool TING, RING;
+bool TEND, REND;
+
+void uart() __interrupt(TF1_VECTOR)
+{
+	if(RING)
+	{
+		if(--RING == 0)
+		{
+			RCNT = 3;
+			if(--RBIT == 0)
+			{
+				RBUF = RDAT;
+				RING = 0;
+				REND = 1;
+			}
+			else
+			{
+				RDAT >>= 1;
+				if(RXB)
+					RDAT |= 0x80;
+			}
+		}
+	}
+	else if(!RXB)
+	{
+		RING = 1;
+		RCNT = 4;
+		RBIT = 9;
+	}
+
+	if(--TCNT == 0)
+	{
+		TCNT = 3;
+		if(TING)
+		{
+			if(TBIT == 0)
+			{
+				TXB = 0;
+				TDAT = TBUF;
+				TBIT = 9;
+			}
+			else
+			{
+				TDAT >>= 1;
+				if(--TBIT == 0)
+				{
+					TXB = 1;
+					TING = 0;
+					TEND = 1;
+				}
+				else
+				{
+					TXB = CY;
+				}
+			}
+		}
+	}
+}
+
+void sendUART(unsigned char data)
+{
+	if(TEND)
+	{
+		TEND = 0;
+		TBUF = data;
+		TING = 1;
+	}
+}
+
+unsigned char receiveUART()
+{
+	REND = 0;
+	return RBUF;
+}
 
 unsigned char numbers[10] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
 
@@ -155,23 +253,11 @@ unsigned char getHour(const unsigned char value) {
 unsigned char hour, minute;
 unsigned char point = 0x80;
 
-void timer1() __interrupt(TF1_VECTOR)
-{
-    static unsigned char t;
-    t++;
-    if(t == 5)
-    {
-        t = 0;
-        if(point == 0x80)
-            point = 0;
-        else
-            point = 0x80;
-    }
-}
-
 void timer0() __interrupt(TF0_VECTOR)
 {
     static unsigned char t;
+	static unsigned int t1;
+
     switch(t)
     {
         case 0:
@@ -187,32 +273,65 @@ void timer0() __interrupt(TF0_VECTOR)
             writeDt(4, numbers[minute & 0x0f]);
             break;
         default:
-            t = -1;
+			t = -1;
+            break;
     }
-    t++;
+
+	t++;
+
+	t1++;
+
+	if(t1 >= 10000)
+    {
+        t1 = 0;
+        if(point == 0x80)
+            point = 0;
+        else
+            point = 0x80;
+    }
 }
 
 int main()
 {
 
-    TMOD = 0x12;
+    TMOD = 0x02;
+
     TR0 = 1;
     ET0 = 1;
+
+	AUXR = 0x40;
+
+	TL1 = BAUD;
+	TH1 = BAUD >> 8;
+	PT1 = 1;
+
     TR1 = 1;
     ET1 = 1;
+
+	TING = 0;
+	RING = 0;
+	TEND = 1;
+	REND = 0;
+	TCNT = 0;
+	RCNT = 0;
+
     EA = 1;
-/*
+
+	// Set up the clock for the first time
+	/*
     write1302(WRITE_PROTECT, 0x00);
     write1302(WRITE_TRICKLE, 0xab);
     write1302(WRITE_SECOND, 0x00);
     write1302(WRITE_MINUTE, 0x00);
     write1302(WRITE_HOUR, 0x00);
     write1302(WRITE_PROTECT, 0x80);
-*/
+	*/
+
     while(1)
     {
         hour = getHour(read1302(READ_HOUR));
         minute = read1302(READ_MINUTE) & 0x7f;
+		sendUART('h');
     }
     return 0;
 }
