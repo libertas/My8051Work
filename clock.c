@@ -359,6 +359,7 @@ int main()
 		if(i > 4)
 		{
 			i = 0;
+			printf("Wrong code!\n");
 			continue;
 		}
 
@@ -383,12 +384,15 @@ int main()
 				hour = getHour(read1302(READ_HOUR));
         		minute = read1302(READ_MINUTE) & 0x7f;
 
+				printf("Time saved!\n");
+
 				i = 0;
 				continue;
 			}
 			else
 			{
 				i = 0;
+				printf("Wrong code!\n");
 				continue;
 			}
 		}
