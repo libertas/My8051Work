@@ -78,6 +78,12 @@ unsigned char receiveUART()
 	return tmp;
 }
 
+unsigned char getChar()
+{
+	while(!REND);
+	return receiveUART();
+}
+
 void uart() __interrupt(TF1_VECTOR)
 {
 	if(RING)
@@ -299,9 +305,20 @@ void timer0() __interrupt(TF0_VECTOR)
     }
 }
 
+void set1302Time(unsigned char h, unsigned char m)
+{
+	write1302(WRITE_PROTECT, 0x00);
+    write1302(WRITE_TRICKLE, 0xab);
+    write1302(WRITE_SECOND, 0x00);
+    write1302(WRITE_MINUTE, m);
+    write1302(WRITE_HOUR, h);
+    write1302(WRITE_PROTECT, 0x80);
+}
+
 int main()
 {
-	unsigned char data;
+	unsigned char buf[5], i = 0;
+	unsigned char tmpHour, tmpMinute;
 
     TMOD = 0x02;
 
@@ -328,23 +345,55 @@ int main()
 
 	// Set up the clock for the first time
 	/*
-    write1302(WRITE_PROTECT, 0x00);
-    write1302(WRITE_TRICKLE, 0xab);
-    write1302(WRITE_SECOND, 0x00);
-    write1302(WRITE_MINUTE, 0x00);
-    write1302(WRITE_HOUR, 0x00);
-    write1302(WRITE_PROTECT, 0x80);
+	set1302Time(0x00, 0x00);
 	*/
 
     while(1)
     {
-        hour = getHour(read1302(READ_HOUR));
-        minute = read1302(READ_MINUTE) & 0x7f;
+		while(!REND)
+		{
+        	hour = getHour(read1302(READ_HOUR));
+        	minute = read1302(READ_MINUTE) & 0x7f;
+		}
 
-		printf("waiting\n");
-		while(!REND);
-		data = receiveUART();
-		printf("Received:%c (0x%x)\n\n", data, data);
+		if(i > 4)
+		{
+			i = 0;
+			continue;
+		}
+
+		buf[i] = receiveUART();
+
+		if(buf[i] == '\n' || buf[i] == '\0' || buf[i] == 19)
+		{
+			if(i == 4)
+			{
+				tmpHour = 0;
+				tmpMinute = 0;
+
+				for(i = 0; i < 4; i++)
+					buf[i] -= '0';
+
+				tmpHour += buf[0] << 4 | buf[1];
+
+				tmpMinute = (buf[2] << 4) + buf[3];
+
+				set1302Time(tmpHour, tmpMinute);
+
+				hour = getHour(read1302(READ_HOUR));
+        		minute = read1302(READ_MINUTE) & 0x7f;
+
+				i = 0;
+				continue;
+			}
+			else
+			{
+				i = 0;
+				continue;
+			}
+		}
+
+		i++;
     }
     return 0;
 }
