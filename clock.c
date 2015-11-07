@@ -364,7 +364,7 @@ int main()
 
 		buf[i] = receiveUART();
 
-		if(buf[i] == '\n' || buf[i] == '\0' || buf[i] == 19)
+		if(buf[i] == '\n' || buf[i] == '\0' || buf[i] == 19 || buf[i] == 's')
 		{
 			if(i == 4)
 			{
