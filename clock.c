@@ -301,6 +301,8 @@ void timer0() __interrupt(TF0_VECTOR)
 
 int main()
 {
+	unsigned char data;
+
     TMOD = 0x02;
 
     TR0 = 1;
@@ -336,13 +338,13 @@ int main()
 
     while(1)
     {
-		/*
         hour = getHour(read1302(READ_HOUR));
         minute = read1302(READ_MINUTE) & 0x7f;
-		*/
+
 		printf("waiting\n");
 		while(!REND);
-		printf("%x\n", receiveUART());
+		data = receiveUART();
+		printf("Received:%c (0x%x)\n\n", data, data);
     }
     return 0;
 }
