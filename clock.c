@@ -73,15 +73,16 @@ void putchar(char c)
 
 unsigned char receiveUART()
 {
+	unsigned char tmp = RBUF;
 	REND = 0;
-	return RBUF;
+	return tmp;
 }
 
 void uart() __interrupt(TF1_VECTOR)
 {
 	if(RING)
 	{
-		if(--RING == 0)
+		if(--RCNT == 0)
 		{
 			RCNT = 3;
 			if(--RBIT == 0)
@@ -118,7 +119,6 @@ void uart() __interrupt(TF1_VECTOR)
 			}
 			else
 			{
-				TDAT >>= 1;
 				if(--TBIT == 0)
 				{
 					TXB = 1;
@@ -127,6 +127,7 @@ void uart() __interrupt(TF1_VECTOR)
 				}
 				else
 				{
+					TDAT >>= 1;
 					TXB = CY;
 				}
 			}
@@ -335,11 +336,13 @@ int main()
 
     while(1)
     {
+		/*
         hour = getHour(read1302(READ_HOUR));
         minute = read1302(READ_MINUTE) & 0x7f;
-		printf("Hello,World!\n");
+		*/
+		printf("waiting\n");
 		while(!REND);
-		putchar(receiveUART());
+		printf("%x\n", receiveUART());
     }
     return 0;
 }
