@@ -381,8 +381,13 @@ int main()
 
 				set1302Time(tmpHour, tmpMinute);
 
-				hour = getHour(read1302(READ_HOUR));
-        		minute = read1302(READ_MINUTE) & 0x7f;
+				tmpHour = getHour(read1302(READ_HOUR));
+        		tmpMinute = read1302(READ_MINUTE) & 0x7f;
+
+				if(tmpHour < 24)
+					hour = tmpHour;
+				if(tmpMinute < 60)
+					minute = tmpMinute;
 
 				printf("Time saved!\n");
 
