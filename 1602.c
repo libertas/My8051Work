@@ -57,10 +57,14 @@ void write_data(unsigned char data)
   write(data);
 }
 
-void init()
+inline void init()
 {
-  int i, j;
+  int i;
 
+  EN = 0;
+  delay();
+  EN = 1;
+  delay();
   EN = 0;
   delay();
 
@@ -79,12 +83,14 @@ void init()
   V0 = 0;
 }
 
+
+__code unsigned char table[] = "Test 1";
+__code unsigned char table1[] = "Test 2";
+
 int main()
 {
 
     unsigned char num = 0;
-    unsigned char table[]="Test 1";
-    unsigned char table1[]="Test 2";
 
     init();
 
