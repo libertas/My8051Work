@@ -6,12 +6,12 @@
 #define RS P1_1
 #define RW P1_2
 #define EN P1_3
-#define DATA P3
+#define DATA P2
 
 volatile void delay()
 {
   int i;
-  for(i = 0; i < 1000; i++) {
+  for(i = 0; i < 10; i++) {
     _nop_();
   }
 }
@@ -19,6 +19,7 @@ volatile void delay()
 char testBusy()
 {
   char r;
+  DATA = 0xff;
   RS = 0;
   RW = 1;
   EN = 1;
@@ -58,7 +59,10 @@ void write_data(unsigned char data)
 
 void init()
 {
-  int i;
+  int i, j;
+
+  EN = 0;
+  delay();
 
   for(i = 0; i < 3; i++) {
     write_com(0x38);
@@ -66,6 +70,7 @@ void init()
     write_com(0x0f);
 
     write_com(0x06);
+
     write_com(0x01);
 
     delay();
