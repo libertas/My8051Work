@@ -11,15 +11,28 @@
 volatile void delay()
 {
   int i;
-  for(i = 0; i < 100; i++) {
+  for(i = 0; i < 1000; i++) {
     _nop_();
   }
+}
+
+char testBusy()
+{
+  char r;
+  RS = 0;
+  RW = 1;
+  EN = 1;
+  delay();
+  r = (DATA & 0x80) >> 7;
+  EN = 0;
+  return r;
 }
 
 void write(unsigned char c)
 {
   RW = 0;
   EN = 0;
+  delay();
   DATA = c;
   delay();
   EN = 1;
@@ -29,32 +42,36 @@ void write(unsigned char c)
 
 void write_com(unsigned char com)
 {
+  while(testBusy());
+
   RS = 0;
   write(com);
 }
 
 void write_data(unsigned char data)
 {
+  while(testBusy());
+
   RS = 1;
   write(data);
 }
 
 void init()
 {
-  int i, j;
+  int i;
 
-  for(i = 0; i < 1000; i++) {
+  for(i = 0; i < 3; i++) {
+    write_com(0x38);
+
+    write_com(0x0f);
+
+    write_com(0x06);
+    write_com(0x01);
+
     delay();
   }
 
   V0 = 0;
-
-  write_com(0x38);
-
-  write_com(0x0f);
-
-  write_com(0x06);
-  write_com(0x01);
 }
 
 int main()
